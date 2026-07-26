@@ -87,17 +87,34 @@ graph LR
 ## 📂 Estructura del Repositorio
 
 ```text
-nfl-telemetry-dlt-pipeline/
-├── src/
-│   ├── 00_data_simulator/
-│   │   └── nfl_telemetry_generator.ipynb
-│   ├── 02_confluent_to_databricks_streaming/
-│   │   └── dlt_confluent_kafka_to_databricks_streaming.py
-│   └── 03_dimensions_table_players_plays_game/
-│       ├── dlt_dim_tables.py
-│       └── dlt_silver_to_gold_fact_separation.py
+nfl-telemetry-dlt-pipeline-databricks/
 ├── analytics/
 │   └── wr_cb_matchup_separation.sql
 ├── experiments/
 │   └── poc_obt_random_forest_validation.ipynb
+├── orchestration/
+│   ├── config/
+│   │   └── airflow.cfg
+│   ├── dags/
+│   │   ├── module/
+│   │   │   ├── players_data_def/
+│   │   │   ├── __init__.py
+│   │   │   └── nfl_telemetry_sintetic_data.py
+│   │   └── 01_nfl_telemetry_producer.py
+│   ├── Dockerfile
+│   ├── docker-compose.yaml
+│   └── requirements.txt
+├── src/
+│   ├── 00_data_simulator/
+│   │   └── nfl_telemetry_generator.ipynb
+│   ├── 01_confluent_to_s3/
+│   │   └── dlt_nfl_telemetry_to_s3.py
+│   ├── 02_confluent_to_databricks_streaming/
+│   │   └── dlt_confluent_kafka_to_databricks_streaming.py
+│   ├── 03_dimensions_table_players_plays_game/
+│   │   ├── dlt_dim_tables.py
+│   │   └── dlt_silver_to_gold_fact_separation.py
+│   └── maintenance/
+│       └── optimize_z_order.ipynb
+├── .gitignore
 └── README.md
