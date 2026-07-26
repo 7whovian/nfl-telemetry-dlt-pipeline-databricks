@@ -1,0 +1,14 @@
+# Entornos virtuales y caché
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Credenciales y variables de entorno (CRÍTICO)
+.env
+*.pem
+.databricks/
+
+# Logs de Airflow y bases de datos locales
+logs/
+*.db
