@@ -142,7 +142,7 @@ nfl-telemetry-dlt-pipeline-databricks/
 ├── .gitignore
 └── README.md
 ```
-🇪🇸 Versión en Español
+## 🇪🇸 Versión en Español
 🏈 Pipeline de Telemetría de la NFL: Streaming, Batch Unificado y Orquestación con Airflow (DLT)
 📌 Resumen General
 Este repositorio demuestra un pipeline de Ingeniería de Datos de extremo a extremo, de grado empresarial, que procesa datos de telemetría de jugadores de la NFL en tiempo real. El flujo completo está automatizado y gestionado por Apache Airflow (desplegado en contenedores Docker), el cual orquesta la generación de métricas de seguimiento espacial de alta frecuencia, su transmisión a través de Confluent Kafka y su procesamiento mediante una estricta Arquitectura Medallón (Bronce, Plata, Oro) utilizando Databricks Delta Live Tables (DLT).
