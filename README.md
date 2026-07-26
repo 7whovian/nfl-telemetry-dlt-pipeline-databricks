@@ -96,17 +96,17 @@ Data Processing (Medallion Architecture - DLT):
 Automated ML Validation: A pre-trained Random Forest model continuously evaluates the OBT to validate predictive quality and detect anomalies in the processed telemetry.
 
 🛠️ Tech Stack
-Orchestration & Infrastructure: Apache Airflow, Docker, Git, Linux (Ubuntu/EC2)
+**Orchestration & Infrastructure:** Apache Airflow, Docker, Git, Linux (Ubuntu/EC2)
 
-Data Processing Engine: Databricks, PySpark, Delta Live Tables (DLT)
+**Data Processing Engine:** Databricks, PySpark, Delta Live Tables (DLT)
 
-Message Streaming: Confluent Cloud (Apache Kafka)
+**Message Streaming:** Confluent Cloud (Apache Kafka)
 
-Data Modeling: Kimball Methodology (Facts/Dimensions), One Big Table (OBT)
+**Data Modeling:** Kimball Methodology (Facts/Dimensions), One Big Table (OBT)
 
-Analytics & Machine Learning: Spark SQL, PySpark MLlib, Random Forest
+**Analytics & Machine Learning:** Spark SQL, PySpark MLlib, Random Forest
 
-Languages: Python, SQL
+**Languages:** Python, SQL
 
 📂 Repository Structure
 ```
@@ -144,10 +144,12 @@ nfl-telemetry-dlt-pipeline-databricks/
 ```
 ## 🇪🇸 Versión en Español
 🏈 Pipeline de Telemetría de la NFL: Streaming, Batch Unificado y Orquestación con Airflow (DLT)
-📌 Resumen General
-Este repositorio demuestra un pipeline de Ingeniería de Datos de extremo a extremo, de grado empresarial, que procesa datos de telemetría de jugadores de la NFL en tiempo real. El flujo completo está automatizado y gestionado por Apache Airflow (desplegado en contenedores Docker), el cual orquesta la generación de métricas de seguimiento espacial de alta frecuencia, su transmisión a través de Confluent Kafka y su procesamiento mediante una estricta Arquitectura Medallón (Bronce, Plata, Oro) utilizando Databricks Delta Live Tables (DLT).
 
-El pipeline culmina en activos de datos altamente optimizados y validados: un Esquema Estrella de Kimball para análisis de BI basados en SQL (evaluando la distancia de separación entre Receptores y Defensores) y una One Big Table (OBT) que alimenta un modelo de Machine Learning (Random Forest) para la validación predictiva automática de la telemetría.
+📌 Resumen General
+
+Este repositorio demuestra un pipeline de Ingeniería de Datos de extremo a extremo, de grado empresarial, que procesa datos de telemetría de jugadores de la NFL en tiempo real. El flujo completo está automatizado y gestionado por **Apache Airflow** (desplegado en contenedores Docker), el cual orquesta la generación de métricas de seguimiento espacial de alta frecuencia, su transmisión a través de **Confluent Kafka** y su procesamiento mediante una estricta Arquitectura Medallón (Bronce, Plata, Oro) utilizando **Databricks Delta Live Tables (DLT).**
+
+El pipeline culmina en activos de datos altamente optimizados y validados: un **Esquema Estrella de Kimball** para análisis de BI basados en SQL (evaluando la distancia de separación entre Receptores y Defensores) y una **One Big Table (OBT)** que alimenta un modelo de Machine Learning (Random Forest) para la validación predictiva automática de la telemetría.
 
 🏗️ Arquitectura y Flujo de Datos
 ```mermaid
@@ -211,11 +213,11 @@ graph LR
     E -- Generación de features --> G
     G -- Evaluación Predictiva --> H
 ```
-Orquestación Segura: Apache Airflow controla la ejecución del pipeline y gestiona el ciclo de vida de la infraestructura en la nube, encendiendo y apagando los clústeres de Databricks para optimizar los costos de cómputo.
+**Orquestación Segura:** Apache Airflow controla la ejecución del pipeline y gestiona el ciclo de vida de la infraestructura en la nube, encendiendo y apagando los clústeres de Databricks para optimizar los costos de cómputo.
 
-Generación de Datos: Un script modular en Python genera telemetría espacial sintética (coordenadas, velocidad, aceleración) simulando eventos de alta frecuencia en el campo.
+**Generación de Datos:** Un script modular en Python genera telemetría espacial sintética (coordenadas, velocidad, aceleración) simulando eventos de alta frecuencia en el campo.
 
-Streaming en Tiempo Real: Los eventos son publicados en Confluent Cloud (Kafka) e ingeridos por Databricks mediante Spark Structured Streaming.
+**Streaming en Tiempo Real:** Los eventos son publicados en Confluent Cloud (Kafka) e ingeridos por Databricks mediante Spark Structured Streaming.
 
 Procesamiento de Datos (Arquitectura Medallón - DLT):
 
@@ -230,17 +232,17 @@ Procesamiento de Datos (Arquitectura Medallón - DLT):
 Validación Automática ML: Un modelo pre-entrenado de Random Forest evalúa continuamente la OBT para validar la calidad predictiva y detectar anomalías en la telemetría procesada.
 
 🛠️ Tecnologías Utilizadas
-Orquestación e Infraestructura: Apache Airflow, Docker, Git, Linux (Ubuntu/EC2)
+**Orquestación e Infraestructura:** Apache Airflow, Docker, Git, Linux (Ubuntu/EC2)
 
-Motor de Procesamiento de Datos: Databricks, PySpark, Delta Live Tables (DLT)
+**Motor de Procesamiento de Datos:** Databricks, PySpark, Delta Live Tables (DLT)
 
-Streaming de Mensajería: Confluent Cloud (Apache Kafka)
+**Streaming de Mensajería:** Confluent Cloud (Apache Kafka)
 
-Modelado de Datos: Metodología Kimball (Hechos/Dimensiones), One Big Table (OBT)
+**Modelado de Datos:** Metodología Kimball (Hechos/Dimensiones), One Big Table (OBT)
 
-Analítica y Machine Learning: Spark SQL, PySpark MLlib, Random Forest
+**Analítica y Machine Learning:** Spark SQL, PySpark MLlib, Random Forest
 
-Lenguajes: Python, SQL
+**Lenguajes*:** Python, SQL
 
 📂 Estructura del Repositorio
 ```
@@ -274,6 +276,5 @@ nfl-telemetry-dlt-pipeline-databricks/
 │   └── maintenance/
 │       └── optimize_z_order.ipynb
 ├── .gitignore
+└── README.md
 ```
-└── README.md
-└── README.md
