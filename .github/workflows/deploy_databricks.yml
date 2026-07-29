@@ -1,0 +1,37 @@
+name: CI/CD - Databricks Pipeline
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/**'           # Se ejecuta si cambias tu código Python/PySpark
+      - 'databricks.yml'   # Se ejecuta si cambias la configuración del bundle
+  workflow_dispatch:
+
+jobs:
+  deploy-bundle:
+    name: Deploy Databricks Bundle
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Instalar Databricks CLI
+        uses: databricks/setup-cli@main
+
+      - name: Desplegar Bundle a Producción
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+        run: |
+          echo "Iniciando despliegue hacia Databricks..."
+          
+          # Valida la sintaxis del bundle antes de intentar subirlo
+          databricks bundle validate
+          
+          # Despliega el código y actualiza el DLT Pipeline en el entorno 'prod'
+          databricks bundle deploy -t prod
+          
+          echo "¡Código de procesamiento desplegado con éxito!"
