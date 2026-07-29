@@ -1,0 +1,36 @@
+name: Deploy Airflow to EC2
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'orchestration/**' # Solo se ejecuta si hay cambios en la orquestación
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Conectar a EC2 y desplegar
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            echo "Iniciando despliegue en EC2..."
+            
+            # 1. Navegar al repositorio
+            cd ~/nfl-telemetry-dlt-pipeline-databricks
+            
+            # 2. Descargar los últimos cambios
+            git pull origin main
+            
+            # 3. Entrar a la carpeta de infraestructura
+            cd orchestration
+            
+            # 4. Reconstruir la imagen (por si cambiaste requirements.txt o Dockerfile) y reiniciar en segundo plano
+            docker compose up -d --build
+            
+            echo "¡Despliegue finalizado con éxito!"
