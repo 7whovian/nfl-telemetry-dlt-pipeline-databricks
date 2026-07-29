@@ -8,12 +8,17 @@ on:
       - 'orchestration/**'
   workflow_dispatch:
 
+# Permisos estrictamente necesarios para que OIDC funcione con AWS
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   # -------------------------------------------------------------
-  # FASE 1: CI (Pruebas de Integridad en GitHub)
+  # FASE 1: CI (Pruebas de Integridad e Integración)
   # -------------------------------------------------------------
-  test-dags:
-    name: Test DAGs Integrity
+  test-pipeline:
+    name: Run Tests
     runs-on: ubuntu-latest
 
     steps:
@@ -29,18 +34,34 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install pytest apache-airflow==2.8.1
+          # Añadimos la instalación de tu requirements por boto3 y confluent_kafka
+          pip install -r orchestration/requirements.txt 
 
-      - name: Ejecutar pruebas de integridad con Pytest
-        # AQUÍ ESTÁ LA CORRECCIÓN: Apuntando a "test" en singular
-        run: |
-          pytest orchestration/test/test_dag_integrity.py 
+      - name: Ejecutar pruebas de DAGs
+        run: pytest orchestration/test/test_dag_integrity.py -v
+
+      - name: Autenticación segura con AWS (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::886181573894:role/EC2-Airflow-Kafka-Role
+          aws-region: us-east-2
+
+      - name: Ejecutar pruebas de Ingesta (S3 y Kafka)
+        env:
+          AWS_S3_BUCKET_NAME: "kafka-nfl-telemetry"
+          AWS_DEFAULT_REGION: "us-east-2"
+          KAFKA_BOOTSTRAP_SERVERS: "pkc-921jm.us-east-2.aws.confluent.cloud:9092"
+          KAFKA_SASL_USERNAME: ${{ secrets.KAFKA_SASL_USERNAME }}
+          KAFKA_SASL_PASSWORD: ${{ secrets.KAFKA_SASL_PASSWORD }}
+          KAFKA_TOPIC_NAME: "nfl_telemetry"
+        run: pytest orchestration/test/test_integration_ingestion.py -v
 
   # -------------------------------------------------------------
-  # FASE 2: CD (Despliegue a EC2 solo si las pruebas pasan)
+  # FASE 2: CD (Despliegue a EC2 solo si TODAS las pruebas pasan)
   # -------------------------------------------------------------
   deploy-ec2:
     name: Deploy to EC2
-    needs: test-dags
+    needs: test-pipeline # Garantiza que no se despliega si Kafka o S3 fallan
     runs-on: ubuntu-latest
 
     steps:
