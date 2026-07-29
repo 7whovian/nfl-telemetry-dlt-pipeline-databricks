@@ -1,14 +1,46 @@
-name: Deploy Airflow to EC2
+name: CI/CD - Airflow Pipeline
 
 on:
   push:
     branches:
       - main
     paths:
-      - 'orchestration/**' # Solo se ejecuta si hay cambios en la orquestación
+      - 'orchestration/**'
+  workflow_dispatch:
 
 jobs:
-  deploy:
+  # -------------------------------------------------------------
+  # FASE 1: CI (Pruebas de Integridad en GitHub)
+  # -------------------------------------------------------------
+  test-dags:
+    name: Test DAGs Integrity
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Configurar entorno de Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Instalar dependencias para pruebas
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest apache-airflow==2.8.1
+
+      - name: Ejecutar pruebas de integridad con Pytest
+        # AQUÍ ESTÁ LA CORRECCIÓN: Apuntando a "test" en singular
+        run: |
+          pytest orchestration/test/test_dag_integrity.py 
+
+  # -------------------------------------------------------------
+  # FASE 2: CD (Despliegue a EC2 solo si las pruebas pasan)
+  # -------------------------------------------------------------
+  deploy-ec2:
+    name: Deploy to EC2
+    needs: test-dags
     runs-on: ubuntu-latest
 
     steps:
@@ -19,18 +51,9 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            echo "Iniciando despliegue en EC2..."
-            
-            # 1. Navegar al repositorio
+            echo "Iniciando despliegue seguro..."
             cd ~/nfl-telemetry-dlt-pipeline-databricks
-            
-            # 2. Descargar los últimos cambios
             git pull origin main
-            
-            # 3. Entrar a la carpeta de infraestructura
             cd orchestration
-            
-            # 4. Reconstruir la imagen (por si cambiaste requirements.txt o Dockerfile) y reiniciar en segundo plano
             docker compose up -d --build
-            
             echo "¡Despliegue finalizado con éxito!"
