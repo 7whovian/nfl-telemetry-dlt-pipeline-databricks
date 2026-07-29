@@ -33,7 +33,7 @@ jobs:
       - name: Instalar dependencias para pruebas
         run: |
           python -m pip install --upgrade pip
-          pip install pytest apache-airflow==2.8.1
+          pip install pytest apache-airflow==3.0.0
           # Añadimos la instalación de tu requirements por boto3 y confluent_kafka
           pip install -r orchestration/requirements.txt 
 
