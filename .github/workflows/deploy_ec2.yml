@@ -17,7 +17,9 @@ jobs:
   test-pipeline:
     name: Run Tests
     runs-on: ubuntu-latest
-
+    env:
+      ACTIONS_RUNNER_DEBUG: true
+      
     steps:
       - name: Checkout del código
         uses: actions/checkout@v4
