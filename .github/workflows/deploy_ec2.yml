@@ -8,6 +8,7 @@ on:
       - 'orchestration/**'
   workflow_dispatch:
 
+# PERMISOS OBLIGATORIOS PARA OIDC (Nivel Workflow)
 permissions:
   id-token: write
   contents: read
@@ -45,6 +46,8 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::886181573894:role/EC2-Airflow-Kafka-Role
           aws-region: us-east-2
+          # Obligamos a que el token JWT coincida con tu política de IAM
+          audience: sts.amazonaws.com 
 
       - name: Ejecutar pruebas de Ingesta (S3 y Kafka)
         env:
@@ -61,7 +64,6 @@ jobs:
     name: Deploy to EC2
     needs: test-pipeline
     runs-on: ubuntu-latest
-
     steps:
       - name: Conectar a EC2 y desplegar
         uses: appleboy/ssh-action@v1.0.3
