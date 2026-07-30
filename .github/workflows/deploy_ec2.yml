@@ -8,15 +8,11 @@ on:
       - 'orchestration/**'
   workflow_dispatch:
 
-# Permisos estrictamente necesarios para que OIDC funcione con AWS
 permissions:
   id-token: write
   contents: read
 
 jobs:
-  # -------------------------------------------------------------
-  # FASE 1: CI (Pruebas de Integridad e Integración)
-  # -------------------------------------------------------------
   test-pipeline:
     name: Run Tests
     runs-on: ubuntu-latest
@@ -25,7 +21,6 @@ jobs:
       - name: Checkout del código
         uses: actions/checkout@v4
 
-      # 1. Pruebas de DAGs usando Docker (Previene el error ModuleNotFoundError)
       - name: Construir imagen de Docker de Airflow
         run: |
           cd orchestration
@@ -35,7 +30,6 @@ jobs:
         run: |
           docker run --rm -v ${{ github.workspace }}/orchestration/test:/opt/airflow/test whovian/airflow-ci-tests bash -c "pip install pytest && python -m pytest test/test_dag_integrity.py -v"
 
-      # 2. Configurar entorno de Python para pruebas de integración (AWS/Kafka)
       - name: Configurar entorno de Python
         uses: actions/setup-python@v5
         with:
@@ -46,14 +40,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install pytest boto3 confluent-kafka python-dotenv
 
-      # 3. Autenticación con AWS (OIDC)
       - name: Autenticación segura con AWS (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::886181573894:role/EC2-Airflow-Kafka-Role
           aws-region: us-east-2
 
-      # 4. Pruebas de Ingesta
       - name: Ejecutar pruebas de Ingesta (S3 y Kafka)
         env:
           AWS_S3_BUCKET_NAME: "kafka-nfl-telemetry"
@@ -62,15 +54,12 @@ jobs:
           KAFKA_SASL_USERNAME: ${{ secrets.KAFKA_SASL_USERNAME }}
           KAFKA_SASL_PASSWORD: ${{ secrets.KAFKA_SASL_PASSWORD }}
           KAFKA_TOPIC_NAME: "nfl_telemetry"
-          KAFKA_SECURITY_PROTOCOL: "SASL_SSL" # Encriptación estricta requerida por Confluent
+          KAFKA_SECURITY_PROTOCOL: "SASL_SSL"
         run: pytest orchestration/test/test_integration_ingestion.py -v
 
-  # -------------------------------------------------------------
-  # FASE 2: CD (Despliegue a EC2 solo si TODAS las pruebas pasan)
-  # -------------------------------------------------------------
   deploy-ec2:
     name: Deploy to EC2
-    needs: test-pipeline # Garantiza que no se despliega si alguna prueba falla
+    needs: test-pipeline
     runs-on: ubuntu-latest
 
     steps:
