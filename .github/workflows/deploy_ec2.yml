@@ -46,8 +46,6 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::886181573894:role/EC2-Airflow-Kafka-Role
           aws-region: us-east-2
-          # Obligamos a que el token JWT coincida con tu política de IAM
-          audience: sts.amazonaws.com
 
       - name: Ejecutar pruebas de Ingesta (S3 y Kafka)
         env:
