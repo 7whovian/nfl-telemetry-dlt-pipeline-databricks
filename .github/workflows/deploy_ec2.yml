@@ -33,7 +33,7 @@ jobs:
 
       - name: Ejecutar pruebas de DAGs en Docker
         run: |
-          docker run --rm whovian/airflow-ci-tests pytest test/test_dag_integrity.py -v
+          docker run --rm whovian/airflow-ci-tests bash -c "pytest test/test_dag_integrity.py -v"
 
       # 2. Configurar entorno de Python para pruebas de integración (AWS/Kafka)
       - name: Configurar entorno de Python
