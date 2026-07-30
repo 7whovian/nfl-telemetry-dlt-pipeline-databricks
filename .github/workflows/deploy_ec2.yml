@@ -45,7 +45,6 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::886181573894:role/EC2-Airflow-Kafka-Role
-          aws-region: us-east-2
           # Obligamos a que el token JWT coincida con tu política de IAM
           audience: sts.amazonaws.com 
 
