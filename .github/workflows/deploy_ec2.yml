@@ -25,27 +25,35 @@ jobs:
       - name: Checkout del código
         uses: actions/checkout@v4
 
+      # 1. Pruebas de DAGs usando Docker (Previene el error ModuleNotFoundError)
+      - name: Construir imagen de Docker de Airflow
+        run: |
+          cd orchestration
+          docker build -t whovian/airflow-ci-tests .
+
+      - name: Ejecutar pruebas de DAGs en Docker
+        run: |
+          docker run --rm whovian/airflow-ci-tests pytest test/test_dag_integrity.py -v
+
+      # 2. Configurar entorno de Python para pruebas de integración (AWS/Kafka)
       - name: Configurar entorno de Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
-      - name: Instalar dependencias para pruebas
+      - name: Instalar dependencias de integración
         run: |
           python -m pip install --upgrade pip
-          pip install pytest apache-airflow==3.0.0
-          # Añadimos la instalación de tu requirements por boto3 y confluent_kafka
-          pip install -r orchestration/requirements.txt 
+          pip install pytest boto3 confluent-kafka python-dotenv
 
-      - name: Ejecutar pruebas de DAGs
-        run: pytest orchestration/test/test_dag_integrity.py -v
-
+      # 3. Autenticación con AWS (OIDC)
       - name: Autenticación segura con AWS (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::886181573894:role/EC2-Airflow-Kafka-Role
           aws-region: us-east-2
 
+      # 4. Pruebas de Ingesta
       - name: Ejecutar pruebas de Ingesta (S3 y Kafka)
         env:
           AWS_S3_BUCKET_NAME: "kafka-nfl-telemetry"
@@ -54,6 +62,7 @@ jobs:
           KAFKA_SASL_USERNAME: ${{ secrets.KAFKA_SASL_USERNAME }}
           KAFKA_SASL_PASSWORD: ${{ secrets.KAFKA_SASL_PASSWORD }}
           KAFKA_TOPIC_NAME: "nfl_telemetry"
+          KAFKA_SECURITY_PROTOCOL: "SASL_SSL" # Encriptación estricta requerida por Confluent
         run: pytest orchestration/test/test_integration_ingestion.py -v
 
   # -------------------------------------------------------------
@@ -61,7 +70,7 @@ jobs:
   # -------------------------------------------------------------
   deploy-ec2:
     name: Deploy to EC2
-    needs: test-pipeline # Garantiza que no se despliega si Kafka o S3 fallan
+    needs: test-pipeline # Garantiza que no se despliega si alguna prueba falla
     runs-on: ubuntu-latest
 
     steps:
