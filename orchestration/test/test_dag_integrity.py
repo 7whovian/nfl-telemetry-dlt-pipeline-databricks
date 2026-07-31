@@ -1,6 +1,6 @@
 import os
 import pytest
-from airflow.models import DagBag
+from airflow.models.dagbag import DagBag
 
 @pytest.fixture(scope="session")
 def dag_bag():
@@ -9,7 +9,7 @@ def dag_bag():
     include_examples=False evita cargar los DAGs de muestra predeterminados de Airflow.
     """
     dags_folder = os.path.join(os.path.dirname(__file__), "../dags")
-    return DagBag(dag_folder=dags_folder, include_examples=False)
+    return DagBag(dag_folder=dags_folder)
 
 def test_no_import_errors(dag_bag):
     """
