@@ -6,6 +6,12 @@ on:
       - main
     paths:
       - 'orchestration/**'
+  # 1. NUEVO GATILLO: Ejecuta CI al crear un Pull Request hacia main
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'orchestration/**'
   workflow_dispatch:
 
 # PERMISOS OBLIGATORIOS PARA OIDC (Nivel Workflow)
@@ -24,6 +30,19 @@ jobs:
       - name: Checkout del código
         uses: actions/checkout@v4
 
+      # 2. NUEVO PASO: Validación de formato estricto (Fail-Fast)
+      - name: Configurar entorno de Python para Linting
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Linting corporativo (Flake8 & Black)
+        run: |
+          python -m pip install --upgrade pip
+          pip install black flake8
+          # Falla si hay errores graves de sintaxis de Python
+          flake8 orchestration/ --count --select=E9,F63,F7,F82 --show-source --statistics
+
       - name: Construir imagen de Docker de Airflow
         run: |
           cd orchestration
@@ -33,14 +52,8 @@ jobs:
         run: |
           docker run --rm -v ${{ github.workspace }}/orchestration/test:/opt/airflow/test whovian/airflow-ci-tests bash -c "pip install pytest && python -m pytest test/test_dag_integrity.py -v"
 
-      - name: Configurar entorno de Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-
       - name: Instalar dependencias de integración
         run: |
-          python -m pip install --upgrade pip
           pip install pytest boto3 confluent-kafka python-dotenv
 
       - name: Autenticación segura con AWS (OIDC)
@@ -63,6 +76,8 @@ jobs:
   deploy-ec2:
     name: Deploy to EC2
     needs: test-pipeline
+    # 3. NUEVA CONDICIÓN: Solo despliega a la instancia si el evento es un 'push' directo a main
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
       - name: Conectar a EC2 y desplegar
