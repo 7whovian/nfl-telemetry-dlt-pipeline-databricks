@@ -6,7 +6,6 @@ on:
       - main
     paths:
       - 'orchestration/**'
-  # 1. NUEVO GATILLO: Ejecuta CI al crear un Pull Request hacia main
   pull_request:
     branches:
       - main
@@ -30,7 +29,6 @@ jobs:
       - name: Checkout del código
         uses: actions/checkout@v4
 
-      # 2. NUEVO PASO: Validación de formato estricto (Fail-Fast)
       - name: Configurar entorno de Python para Linting
         uses: actions/setup-python@v5
         with:
@@ -40,7 +38,6 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install black flake8
-          # Falla si hay errores graves de sintaxis de Python
           flake8 orchestration/ --count --select=E9,F63,F7,F82 --show-source --statistics
 
       - name: Construir imagen de Docker de Airflow
@@ -74,22 +71,25 @@ jobs:
         run: pytest orchestration/test/test_integration_ingestion.py -v
 
   deploy-ec2:
-    name: Deploy to EC2
+    name: Deploy to EC2 via AWS SSM
     needs: test-pipeline
-    # 3. NUEVA CONDICIÓN: Solo despliega a la instancia si el evento es un 'push' directo a main
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
-      - name: Conectar a EC2 y desplegar
-        uses: appleboy/ssh-action@v1.0.3
+      - name: Autenticación segura con AWS (OIDC) para el despliegue
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            echo "Iniciando despliegue seguro..."
-            cd ~/nfl-telemetry-dlt-pipeline-databricks
-            git pull origin main
-            cd orchestration
-            docker compose up -d --build
-            echo "¡Despliegue finalizado con éxito!"
+          role-to-assume: arn:aws:iam::886181573894:role/EC2-Airflow-Kafka-Role
+          aws-region: us-east-2
+
+      - name: Enviar comando de actualización al servidor mediante AWS Systems Manager
+        run: |
+          echo "Iniciando despliegue seguro a través de AWS SSM..."
+          aws ssm send-command \
+            --instance-ids "i-0ee1cdb7a7f5eb669" \
+            --document-name "AWS-RunShellScript" \
+            --parameters 'commands=["su - ubuntu -c \"cd ~/nfl-telemetry-dlt-pipeline-databricks && git pull origin main && cd orchestration && docker compose up -d --build\""]' \
+            --comment "Despliegue automatizado de Airflow Pipeline vía SSM" \
+            --region us-east-2 \
+            --output text
+          echo "¡Comando de despliegue enviado con éxito a la infraestructura!"
