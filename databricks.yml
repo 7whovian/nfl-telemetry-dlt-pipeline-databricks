@@ -1,0 +1,50 @@
+bundle:
+  name: nfl_telemetry_pipeline
+
+# Variables globales para parametrizar entornos
+variables:
+  catalog_name:
+    description: "Catálogo de Unity Catalog destino"
+    default: "main"
+
+resources:
+  pipelines:
+    nfl_telemetry_dlt_pipeline:
+      name: "nfl_telemetry_dlt_${bundle.target}"
+      # Apunta a los archivos Python específicos de las carpetas 03 y 04
+      libraries:
+        - file:
+            path: ./src/03_dimensions_table_players_plays_game/dlt_dim_tables.py
+        - file:
+            path: ./src/03_dimensions_table_players_plays_game/dlt_silver_to_gold_fact_separation.py
+        - file:
+            path: ./src/04_dlt_telemetry_streaming_airflow/transformation.py
+      # Configuración del esquema/base de datos destino dinámico
+      target: "nfl_telemetry_${bundle.target}"
+      catalog: ${var.catalog_name}
+      channel: "CURRENT"
+      continuous: false
+      # Configuración del clúster
+      clusters:
+        - label: "default"
+          num_workers: 1
+          node_type_id: "m5d.large" 
+
+# Aislamiento de Entornos (Dev vs Prod)
+targets:
+  dev:
+    default: true
+    workspace:
+      host: "https://dbc-88d65fb3-00e0.cloud.databricks.com"
+    resources:
+      pipelines:
+        nfl_telemetry_dlt_pipeline:
+          development: true
+
+  prod:
+    workspace:
+      host: "https://dbc-88d65fb3-00e0.cloud.databricks.com"
+    resources:
+      pipelines:
+        nfl_telemetry_dlt_pipeline:
+          development: false
