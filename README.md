@@ -77,6 +77,7 @@ graph LR
     E -- Feature Generation --> G
     G -- Predictive Evaluation --> H
 ```
+
 Secure Orchestration: Apache Airflow controls the pipeline execution and manages the cloud infrastructure lifecycle, starting and stopping Databricks clusters to optimize compute costs.
 
 Data Generation: A modular Python script generates synthetic spatial telemetry (coordinates, speed, acceleration) simulating high-frequency events on the field.
